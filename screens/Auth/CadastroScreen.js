@@ -1,26 +1,36 @@
 // (Tela de Cadastro - Comentário Escondido: Esta tela permite o registro de novos usuários com Supabase)
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { supabase } from '../supabaseClient'; // (Comentário Escondido: Importa o cliente Supabase)
+import React, { useState } from "react";
+import { Text, TouchableOpacity, Alert, StyleSheet } from "react-native"; // (Comentário Escondido: Removido View e TextInput, Button que serão substituídos)
+import { supabase } from "../../services/supabaseClient"; // (Comentário Escondido: Importa o cliente Supabase)
+
+// (Comentário Escondido: Importa os componentes reutilizáveis)
+import ScreenContainer from "../../components/ScreenContainer";
+import CustomTextInput from "../../components/CustomTextInput";
+import CustomButton from "../../components/CustomButton";
+import LoadingIndicator from "../../components/LoadingIndicator";
 
 // (Comentário Escondido: Componente principal da tela de Cadastro)
 const CadastroScreen = ({ navigation }) => {
-  // (Comentário Escondido: Estados para armazenar nome, e-mail e senha)
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  // (Comentário Escondido: Estados para armazenar nome, e-mail, senha e carregamento)
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false); // (Comentário Escondido: Estado para feedback de carregamento)
 
   // (Comentário Escondido: Função para lidar com o processo de cadastro via Supabase)
   const handleCadastro = async () => {
     // (Comentário Escondido: Validação básica dos campos)
     if (!nome || !email || !password || !confirmPassword) {
-      Alert.alert('Erro de Cadastro', 'Por favor, preencha todos os campos.');
+      Alert.alert("Erro de Cadastro", "Por favor, preencha todos os campos.");
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Erro de Cadastro', 'As senhas não coincidem.');
+      Alert.alert("Erro de Cadastro", "As senhas não coincidem.");
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert("Erro de Cadastro", "A senha deve ter no mínimo 6 caracteres.");
       return;
     }
 
@@ -30,46 +40,56 @@ const CadastroScreen = ({ navigation }) => {
       password: password,
       options: {
         data: {
-          full_name: nome,
-        }
-      }
+          full_name: nome, // (Comentário Escondido: Supabase espera full_name em options.data para metadados do usuário)
+        },
+      },
     });
-
     setLoading(false); // (Comentário Escondido: Desativa o indicador de carregamento)
 
     if (error) {
-      Alert.alert('Erro de Cadastro', error.message);
+      Alert.alert("Erro de Cadastro", error.message);
     } else if (data.user && data.session === null) {
-        Alert.alert('Cadastro Quase Concluído!', 'Verifique seu e-mail para confirmar sua conta antes de fazer login.');
-        navigation.navigate('LoginScreen');
+      Alert.alert(
+        "Cadastro Quase Concluído!",
+        "Verifique seu e-mail para confirmar sua conta antes de fazer login."
+      );
+      navigation.navigate("LoginScreen");
     } else if (data.user && data.session) {
-        Alert.alert('Cadastro Concluído!', 'Você foi cadastrado e logado com sucesso!');
-        // (Comentário Escondido: Idealmente, aqui você gerenciaria o estado global da sessão e navegaria para a tela principal)
-        // navigation.navigate('AppPrincipal'); // Exemplo
-        navigation.navigate('LoginScreen'); // Por ora, volta para Login para o usuário logar após confirmar email (se necessário)
+      Alert.alert("Cadastro Concluído!", "Você foi cadastrado e logado com sucesso!");
+      // (Comentário Escondido: A navegação para a tela principal é gerenciada pelo AppNavigator)
     } else {
-        Alert.alert('Cadastro Concluído!', 'Verifique seu e-mail para confirmar sua conta antes de fazer login.');
-        navigation.navigate('LoginScreen');
+      // (Comentário Escondido: Fallback caso o Supabase retorne um estado inesperado, mas geralmente um dos acima deve ocorrer)
+      Alert.alert(
+        "Cadastro Enviado",
+        "Se um e-mail de confirmação for necessário, verifique sua caixa de entrada."
+      );
+      navigation.navigate("LoginScreen");
     }
   };
+  
+  // (Comentário Escondido: Se estiver carregando, poderia exibir um LoadingIndicator sobreposto ou no lugar do botão)
+  // No CustomButton, o próprio botão já mostra "Cadastrando..."
 
   return (
-    <View style={styles.container}>
+    // (Comentário Escondido: Utiliza o ScreenContainer para padronização)
+    <ScreenContainer style={styles.container} scrollable={true}>
       {/* (Comentário Escondido: Título da tela) */}
       <Text style={styles.title}>Cadastro - ComprasOnline</Text>
       
-      <TextInput
-        style={styles.input}
-        placeholder="Nome Completo"
+      {/* (Comentário Escondido: Utiliza CustomTextInput para o campo de nome) */}
+      <CustomTextInput
+        label="Nome Completo"
+        placeholder="Seu nome completo"
         value={nome}
         onChangeText={setNome}
         autoCapitalize="words"
-        disabled={loading} // (Comentário Escondido: Desabilita durante o carregamento)
+        disabled={loading}
       />
       
-      <TextInput
-        style={styles.input}
-        placeholder="E-mail"
+      {/* (Comentário Escondido: Utiliza CustomTextInput para o campo de e-mail) */}
+      <CustomTextInput
+        label="E-mail"
+        placeholder="seuemail@example.com"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -77,65 +97,59 @@ const CadastroScreen = ({ navigation }) => {
         disabled={loading}
       />
       
-      <TextInput
-        style={styles.input}
-        placeholder="Senha (mínimo 6 caracteres)"
+      {/* (Comentário Escondido: Utiliza CustomTextInput para o campo de senha) */}
+      <CustomTextInput
+        label="Senha"
+        placeholder="Mínimo 6 caracteres"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         disabled={loading}
       />
       
-      <TextInput
-        style={styles.input}
-        placeholder="Confirmar Senha"
+      {/* (Comentário Escondido: Utiliza CustomTextInput para o campo de confirmação de senha) */}
+      <CustomTextInput
+        label="Confirmar Senha"
+        placeholder="Repita a senha"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         secureTextEntry
         disabled={loading}
       />
       
-      {/* (Comentário Escondido: Botão para submeter o cadastro, mostra "Carregando..." se loading for true) */}
-      <Button title={loading ? "Cadastrando..." : "Cadastrar"} onPress={handleCadastro} color="#FFA500" disabled={loading} />
+      {/* (Comentário Escondido: Utiliza CustomButton para o botão de cadastro) */}
+      <CustomButton 
+        title="Cadastrar"
+        onPress={handleCadastro} 
+        loading={loading} 
+        disabled={loading}
+      />
       
-      <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} disabled={loading}>
+      <TouchableOpacity onPress={() => navigation.navigate("LoginScreen")} disabled={loading}>
         <Text style={styles.linkText}>Já tem uma conta? Faça Login</Text>
       </TouchableOpacity>
-    </View>
+    </ScreenContainer>
   );
 };
 
 // (Comentário Escondido: Estilos para os componentes da tela de Cadastro)
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    justifyContent: "center", // (Comentário Escondido: Centraliza o conteúdo dentro do ScreenContainer)
+    alignItems: "center",
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 30,
-    color: '#333',
-  },
-  input: {
-    width: '100%',
-    height: 50,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
+    color: "#333",
+    textAlign: "center",
   },
   linkText: {
     marginTop: 20,
-    color: '#FFA500',
+    color: "#FFA500",
     fontSize: 16,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
 });
 

@@ -1,12 +1,12 @@
-# Aplicativo ComprasOnline
+# Aplicativo ComprasOnline (Refatorado)
 
 ## Descrição do Projeto
 
-O "ComprasOnline" é um aplicativo móvel desenvolvido utilizando React Native com Expo. Ele simula uma plataforma de compras online, permitindo o cadastro e login de usuários, e o gerenciamento completo (CRUD) de um catálogo de produtos. Este projeto foi desenvolvido como parte da atividade avaliativa G2 da disciplina Tópicos Especiais em Computação.
+O "ComprasOnline" é um aplicativo móvel desenvolvido utilizando React Native com Expo. Ele simula uma plataforma de compras online, permitindo o cadastro e login de usuários, e o gerenciamento completo (CRUD) de um catálogo de produtos. Este projeto foi desenvolvido como parte da atividade avaliativa G2 da disciplina Tópicos Especiais em Computação e **passou por uma fase de refatoração para atender a requisitos técnicos adicionais**, focando em componentização, organização de pastas e padronização visual.
 
 ## Funcionalidades Implementadas
 
-O aplicativo inclui as seguintes funcionalidades, conforme os requisitos obrigatórios:
+O aplicativo inclui as seguintes funcionalidades, conforme os requisitos obrigatórios e técnicos:
 
 1.  **Splash Screen Personalizada:** Tela inicial exibida ao abrir o app, com o logo "ComprasOnline".
 2.  **Ícone do Aplicativo Personalizado:** Ícone exclusivo para o app.
@@ -32,11 +32,24 @@ O aplicativo inclui as seguintes funcionalidades, conforme os requisitos obrigat
     *   Formulário de Adicionar/Editar Produto
     *   Detalhes do Produto
     *   Carrinho (Placeholder, Aba Carrinho)
-    *   Perfil (Placeholder, Aba Perfil)
+    *   Perfil (Aba Perfil, leva para Informações do App e Logout)
     *   Informações sobre o App (SAC)
 8.  **Tela com Informações sobre o App e os Desenvolvedores (SAC):**
     *   Acessível pela aba "Perfil", contém versão do app, desenvolvedores, contato e descrição.
 9.  **Comentários Escondidos:** Todas as telas e componentes principais possuem comentários explicativos no código-fonte.
+
+**Melhorias da Refatoração:**
+
+*   **Uso do `react-navigation`:** Navegação em pilha (Stack Navigator) e abas (Bottom Tabs) implementada e organizada.
+*   **Autenticação com Supabase:** Mantida e funcional.
+*   **Componentização:** Criação de componentes reutilizáveis (ex: `CustomButton`, `CustomTextInput`, `ScreenContainer`, `ProductCard`, `LoadingIndicator`) na pasta `components/` e integração nas telas.
+*   **Organização de Pastas do Projeto:** Estrutura de pastas revisada e organizada conforme as melhores práticas:
+    *   `screens/`: Telas principais da aplicação.
+    *   `components/`: Componentes reutilizáveis.
+    *   `services/`: Conexão com APIs ou banco de dados (ex: `supabaseClient.js`).
+    *   `assets/`: Imagens, ícones, fontes.
+    *   `routes/`: Arquivos de navegação (ex: `AppNavigator.js`).
+*   **Estilização Limpa e Organizada:** Interface revisada para melhor organização visual, alinhamentos, espaçamentos e consistência de cores.
 
 ## Tecnologias Utilizadas
 
@@ -46,22 +59,25 @@ O aplicativo inclui as seguintes funcionalidades, conforme os requisitos obrigat
 *   **JavaScript:** Linguagem de programação principal.
 *   **React Navigation:** Biblioteca para gerenciamento de navegação entre telas.
 
-## Estrutura do Projeto
+## Estrutura do Projeto (Pós-Refatoração)
 
 O código-fonte está organizado da seguinte forma:
 
 ```
 /AplicativoCompras
 |-- /assets                   # Imagens (ícone, splash)
+|-- /components               # Componentes reutilizáveis (CustomButton.js, etc.)
+|-- /routes                   # Configuração da navegação (AppNavigator.js)
 |-- /screens                  # Componentes de tela
-|   |-- /Auth                 # Telas de Autenticação (Login, Cadastro)
-|   |-- /Products             # Telas de Produtos (Lista, Formulário, Detalhes)
+|   |-- /Auth                 # Telas de Autenticação (LoginScreen.js, CadastroScreen.js)
+|   |-- /Products             # Telas de Produtos (ProductListScreen.js, etc.)
 |   |-- InfoAppScreen.js      # Tela de Informações do App
-|-- App.js                    # Componente raiz e configuração da navegação principal
-|-- supabaseClient.js         # Configuração do cliente Supabase
+|-- /services                 # Serviços (supabaseClient.js)
+|-- index.js                  # Ponto de entrada do aplicativo, registra o AppNavigator
 |-- app.json                  # Configurações do projeto Expo (nome, ícone, splash, etc.)
 |-- package.json              # Dependências e scripts do projeto
 |-- README.md                 # Este arquivo
+|-- .gitignore                # Arquivos ignorados pelo Git
 ```
 
 ## Configuração e Execução
@@ -70,8 +86,8 @@ Para executar o projeto localmente, siga os passos abaixo:
 
 1.  **Clone o Repositório:**
     ```bash
-    git clone [URL_DO_SEU_REPOSITORIO_GITHUB]
-    cd AplicativoCompras
+    git clone https://github.com/LipeGuindani/aplicativocompras.git 
+    cd aplicativocompras 
     ```
 
 2.  **Instale as Dependências:**
@@ -93,11 +109,11 @@ Para executar o projeto localmente, siga os passos abaixo:
           price NUMERIC
         );
         ```
-    *   Certifique-se de que as Row Level Security (RLS) policies para a tabela `PRODUTOS` permitem as operações de `SELECT` para usuários autenticados (e `INSERT`, `UPDATE`, `DELETE` conforme a lógica de permissão desejada, por exemplo, apenas para administradores ou todos os usuários autenticados).
-    *   Atualize o arquivo `/home/ubuntu/AplicativoCompras/supabaseClient.js` com a URL e a Chave Anônima (anon key) do SEU projeto Supabase:
+    *   Certifique-se de que as Row Level Security (RLS) policies para a tabela `PRODUTOS` permitem as operações de `SELECT` para usuários autenticados (e `INSERT`, `UPDATE`, `DELETE` conforme a lógica de permissão desejada).
+    *   Atualize o arquivo `/AplicativoCompras/services/supabaseClient.js` com a URL e a Chave Anônima (anon key) do SEU projeto Supabase:
         ```javascript
-        const supabaseUrl = "SUA_URL_SUPABASE";
-        const supabaseAnonKey = "SUA_CHAVE_ANON_SUPABASE";
+        const supabaseUrl = "SUA_URL_SUPABASE"; // Substitua pela sua URL
+        const supabaseAnonKey = "SUA_CHAVE_ANON_SUPABASE"; // Substitua pela sua chave
         ```
 
 4.  **Inicie o Aplicativo com Expo:**
@@ -110,15 +126,15 @@ Para executar o projeto localmente, siga os passos abaixo:
 
 ## Desenvolvedores
 
-*   Manus (IA) - Assistente de Desenvolvimento
 *   [Seu Nome / Nomes do Grupo Aqui]
+*   Assistência: Manus (IA)
 
 ## Considerações Finais
 
 *   A tela de "Carrinho" é um placeholder e não possui funcionalidades completas de e-commerce.
-*   A gestão de permissões para o CRUD de produtos (quem pode adicionar/editar/excluir) pode ser refinada com Row Level Security no Supabase.
-*   Para a submissão no GitHub, a pasta `node_modules` não deve ser incluída.
+*   A gestão de permissões para o CRUD de produtos pode ser refinada com Row Level Security no Supabase.
+*   Para a submissão no GitHub, a pasta `node_modules` não deve ser incluída (já configurado no `.gitignore`).
 
 ---
-*Este README foi gerado para o projeto ComprasOnline.*
+*Este README foi atualizado para o projeto ComprasOnline refatorado.*
 

@@ -1,8 +1,14 @@
-// (Tela de Listagem de Produtos - Comentário Escondido: Exibe os produtos cadastrados no Supabase)
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, Button, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
-import { supabase } from '../../supabaseClient'; // (Comentário Escondido: Importa o cliente Supabase)
-import { useFocusEffect } from '@react-navigation/native'; // (Comentário Escondido: Para recarregar dados ao focar na tela)
+// (Tela de Listagem de Produtos - Comentário Escondido: Exibe os produtos cadastrados no Supabase utilizando componentes reutilizáveis)
+import React, { useState, useCallback } from "react";
+import { View, Text, FlatList, StyleSheet, Alert } from "react-native"; // (Comentário Escondido: Removido ActivityIndicator, TouchableOpacity, Button que serão substituídos ou tratados por componentes)
+import { supabase } from "../../services/supabaseClient"; // (Comentário Escondido: Importa o cliente Supabase)
+import { useFocusEffect } from "@react-navigation/native"; // (Comentário Escondido: Para recarregar dados ao focar na tela)
+
+// (Comentário Escondido: Importa os componentes reutilizáveis)
+import ScreenContainer from "../../components/ScreenContainer";
+import ProductCard from "../../components/ProductCard";
+import CustomButton from "../../components/CustomButton";
+import LoadingIndicator from "../../components/LoadingIndicator";
 
 // (Comentário Escondido: Componente principal da tela de Listagem de Produtos)
 const ProductListScreen = ({ navigation }) => {
@@ -12,14 +18,14 @@ const ProductListScreen = ({ navigation }) => {
   const [error, setError] = useState(null);
 
   // (Comentário Escondido: Função para buscar os produtos no Supabase)
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const { data, error: fetchError } = await supabase
-        .from('PRODUTOS') // (Comentário Escondido: Nome da tabela conforme fornecido pelo usuário)
-        .select('id, name, description, price') // (Comentário Escondido: Seleciona os campos relevantes)
-        .order('name', { ascending: true });
+        .from("PRODUTOS") // (Comentário Escondido: Nome da tabela conforme fornecido pelo usuário)
+        .select("id, name, description, price") // (Comentário Escondido: Seleciona os campos relevantes)
+        .order("name", { ascending: true });
 
       if (fetchError) {
         throw fetchError;
@@ -27,40 +33,36 @@ const ProductListScreen = ({ navigation }) => {
       setProducts(data || []);
     } catch (e) {
       setError(e.message);
-      Alert.alert('Erro ao Buscar Produtos', e.message);
+      Alert.alert("Erro ao Buscar Produtos", e.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // (Comentário Escondido: Hook para buscar produtos quando a tela é focada/montada)
-  useFocusEffect(
-    useCallback(() => {
-      fetchProducts();
-    }, [])
-  );
+  useFocusEffect(fetchProducts);
 
   // (Comentário Escondido: Função para lidar com a exclusão de um produto)
   const handleDeleteProduct = async (productId) => {
     Alert.alert(
-      'Confirmar Exclusão',
-      'Tem certeza que deseja excluir este produto?',
+      "Confirmar Exclusão",
+      "Tem certeza que deseja excluir este produto?",
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Excluir',
-          style: 'destructive',
+          text: "Excluir",
+          style: "destructive",
           onPress: async () => {
-            setLoading(true);
+            setLoading(true); // (Comentário Escondido: Idealmente, um loading específico para a ação de deletar)
             const { error: deleteError } = await supabase
-              .from('PRODUTOS')
+              .from("PRODUTOS")
               .delete()
               .match({ id: productId });
             setLoading(false);
             if (deleteError) {
-              Alert.alert('Erro ao Excluir', deleteError.message);
+              Alert.alert("Erro ao Excluir", deleteError.message);
             } else {
-              Alert.alert('Sucesso', 'Produto excluído com sucesso!');
+              Alert.alert("Sucesso", "Produto excluído com sucesso!");
               fetchProducts(); // (Comentário Escondido: Recarrega a lista após a exclusão)
             }
           },
@@ -69,154 +71,104 @@ const ProductListScreen = ({ navigation }) => {
     );
   };
 
-  // (Comentário Escondido: Renderiza cada item da lista de produtos)
+  // (Comentário Escondido: Renderiza cada item da lista de produtos usando ProductCard)
   const renderProductItem = ({ item }) => (
-    <View style={styles.productItemContainer}>
-      <TouchableOpacity 
-        style={styles.productDetails}
-        onPress={() => navigation.navigate('ProductDetailScreen', { productId: item.id })} // (Comentário Escondido: Navega para detalhes do produto)
-      >
-        <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.productDescription} numberOfLines={2}>{item.description}</Text>
-        {/* (Comentário Escondido: Exibe o preço. Lembrar que está como varchar) */}
-        <Text style={styles.productPrice}>Preço: {item.price}</Text>
-      </TouchableOpacity>
-      <View style={styles.productActions}>
-        <Button 
-          title="Editar" 
-          onPress={() => navigation.navigate('ProductFormScreen', { productId: item.id })} // (Comentário Escondido: Navega para edição)
-          color="#007bff"
-        />
-        <View style={{marginVertical: 5}} />
-        <Button 
-          title="Excluir" 
-          onPress={() => handleDeleteProduct(item.id)} 
-          color="#dc3545"
-        />
-      </View>
-    </View>
+    <ProductCard
+      product={item}
+      onPress={() => navigation.navigate("ProductDetailScreen", { productId: item.id })}
+      onEdit={() => navigation.navigate("ProductFormScreen", { productId: item.id })}
+      onDelete={() => handleDeleteProduct(item.id)}
+    />
   );
 
-  // (Comentário Escondido: Exibe indicador de carregamento)
-  if (loading && !products.length) {
-    return <ActivityIndicator size="large" color="#FFA500" style={styles.loader} />;
+  // (Comentário Escondido: Exibe indicador de carregamento centralizado)
+  if (loading && products.length === 0) {
+    return <LoadingIndicator />;
   }
 
   // (Comentário Escondido: Exibe mensagem de erro, se houver)
   if (error) {
-    return <View style={styles.centered}><Text style={styles.errorText}>Erro ao carregar produtos: {error}</Text><Button title="Tentar Novamente" onPress={fetchProducts} /></View>;
+    return (
+      <ScreenContainer style={styles.centeredContainer}>
+        <Text style={styles.errorText}>Erro ao carregar produtos: {error}</Text>
+        <CustomButton title="Tentar Novamente" onPress={fetchProducts} />
+      </ScreenContainer>
+    );
   }
 
   return (
-    <View style={styles.container}>
-      {/* (Comentário Escondido: Título da tela e botão para adicionar novo produto) */}
+    // (Comentário Escondido: Utiliza ScreenContainer para padronização da tela)
+    <ScreenContainer>
+      {/* (Comentário Escondido: Cabeçalho da tela com título e botão para adicionar novo produto) */}
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>Produtos - ComprasOnline</Text>
-        <Button 
+        <Text style={styles.title}>Produtos</Text>
+        <CustomButton 
           title="Adicionar Produto" 
-          onPress={() => navigation.navigate('ProductFormScreen')} // (Comentário Escondido: Navega para o formulário de novo produto)
+          onPress={() => navigation.navigate("ProductFormScreen")} 
+          style={styles.addButton} 
+          textStyle={styles.addButtonText}
           color="#28a745"
         />
       </View>
       
       {/* (Comentário Escondido: Lista de produtos ou mensagem se estiver vazia) */}
       {products.length === 0 && !loading ? (
-        <View style={styles.centered}><Text style={styles.emptyText}>Nenhum produto cadastrado.</Text></View>
+        <View style={styles.centeredContainer}>
+            <Text style={styles.emptyText}>Nenhum produto cadastrado.</Text>
+        </View>
       ) : (
         <FlatList
           data={products}
           renderItem={renderProductItem}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContentContainer}
-          refreshing={loading}
+          refreshing={loading} // (Comentário Escondido: Mostra o indicador de refresh do FlatList)
           onRefresh={fetchProducts} // (Comentário Escondido: Permite puxar para atualizar)
         />
       )}
-    </View>
+    </ScreenContainer>
   );
 };
 
 // (Comentário Escondido: Estilos para os componentes da tela)
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
   headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#dee2e6',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20, // (Comentário Escondido: Espaçamento abaixo do cabeçalho)
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#343a40',
+    fontSize: 26, // (Comentário Escondido: Tamanho de título maior)
+    fontWeight: "bold",
+    color: "#343a40",
+  },
+  addButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    minHeight: 0, // (Comentário Escondido: Remove altura mínima para botão menor)
+  },
+  addButtonText: {
+    fontSize: 14,
   },
   listContentContainer: {
-    padding: 10,
+    paddingBottom: 20, // (Comentário Escondido: Espaço no final da lista)
   },
-  productItemContainer: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    elevation: 2, // (Comentário Escondido: Sombra para Android)
-    shadowColor: '#000', // (Comentário Escondido: Sombra para iOS)
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-  },
-  productDetails: {
-    flex: 1, // (Comentário Escondido: Permite que o texto ocupe o espaço disponível)
-    marginRight: 10,
-  },
-  productName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#495057',
-  },
-  productDescription: {
-    fontSize: 14,
-    color: '#6c757d',
-    marginTop: 4,
-  },
-  productPrice: {
-    fontSize: 16,
-    color: '#28a745',
-    marginTop: 6,
-    fontWeight: 'bold',
-  },
-  productActions: {
-    flexDirection: 'column',
-  },
-  loader: {
+  centeredContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
   errorText: {
     fontSize: 16,
-    color: 'red',
-    textAlign: 'center',
+    color: "red",
+    textAlign: "center",
     marginBottom: 10,
   },
   emptyText: {
     fontSize: 16,
-    color: '#6c757d',
-    textAlign: 'center',
+    color: "#6c757d",
+    textAlign: "center",
   },
 });
 

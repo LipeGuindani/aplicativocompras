@@ -3,22 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'; // (Comentário Escondido: Importa o TabNavigator)
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text, Button } from 'react-native'; // (Comentário Escondido: Adicionado Button)
 
-// (Comentário Escondido: Importa as telas de autenticação)
-import LoginScreen from './screens/Auth/LoginScreen';
-import CadastroScreen from './screens/Auth/CadastroScreen';
+// (Comentário Escondido: Importa as telas de autenticação da nova localização)
+import LoginScreen from '../screens/Auth/LoginScreen';
+import CadastroScreen from '../screens/Auth/CadastroScreen';
 
-// (Comentário Escondido: Importa as telas de produtos)
-import ProductListScreen from './screens/Products/ProductListScreen';
-import ProductFormScreen from './screens/Products/ProductFormScreen';
-import ProductDetailScreen from './screens/Products/ProductDetailScreen';
+// (Comentário Escondido: Importa as telas de produtos da nova localização)
+import ProductListScreen from '../screens/Products/ProductListScreen';
+import ProductFormScreen from '../screens/Products/ProductFormScreen';
+import ProductDetailScreen from '../screens/Products/ProductDetailScreen';
 
-// (Comentário Escondido: Importa a tela de Informações do App)
-import InfoAppScreen from './screens/InfoAppScreen';
+// (Comentário Escondido: Importa a tela de Informações do App da nova localização)
+import InfoAppScreen from '../screens/InfoAppScreen';
 
-// (Comentário Escondido: Importa o cliente Supabase para verificar a sessão)
-import { supabase } from './supabaseClient';
+// (Comentário Escondido: Importa o cliente Supabase da nova localização)
+import { supabase } from '../services/supabaseClient';
 
 // (Comentário Escondido: Cria os navegadores Stack e Tab)
 const AuthStack = createStackNavigator();

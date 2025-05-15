@@ -1,14 +1,15 @@
-// (Tela de Informações do Aplicativo - Comentário Escondido: Exibe informações sobre o app e desenvolvedores)
+// (Tela de Informações do Aplicativo - Comentário Escondido: Exibe informações sobre o app e desenvolvedores usando ScreenContainer)
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Linking, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, View, Linking, TouchableOpacity } from 'react-native'; // (Comentário Escondido: Removido ScrollView)
+import ScreenContainer from '../../components/ScreenContainer'; // (Comentário Escondido: Importa o ScreenContainer)
 
 // (Comentário Escondido: Componente principal da tela de Informações do App)
 const InfoAppScreen = ({ navigation }) => {
-  // (Comentário Escondido: Dados fictícios para demonstração)
-  const appVersion = '1.0.0';
-  const developers = ['Manus (IA)', 'Seu Nome/Grupo Aqui']; // (Comentário Escondido: Ajustar com os nomes reais)
+  // (Comentário Escondido: Dados fictícios para demonstração - devem ser ajustados pelo usuário)
+  const appVersion = '1.0.1-refactored'; // (Comentário Escondido: Versão atualizada após refatoração)
+  const developers = ['Seu Nome/Grupo Aqui', 'Assistido por Manus (IA)']; // (Comentário Escondido: Ajustar com os nomes reais)
   const contactEmail = 'suporte@comprasonline.app';
-  const projectDescription = 'Este é um aplicativo de compras online desenvolvido como parte da atividade avaliativa G2 da disciplina Tópicos Especiais em Computação. Ele permite o cadastro e login de usuários, e o gerenciamento de um catálogo de produtos (CRUD completo).';
+  const projectDescription = 'Este é um aplicativo de compras online desenvolvido como parte da atividade avaliativa G2 da disciplina Tópicos Especiais em Computação. Ele permite o cadastro e login de usuários, e o gerenciamento de um catálogo de produtos (CRUD completo), seguindo boas práticas de componentização e organização de projeto.';
 
   // (Comentário Escondido: Função para abrir link de e-mail)
   const handleEmailPress = () => {
@@ -16,7 +17,8 @@ const InfoAppScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    // (Comentário Escondido: Utiliza ScreenContainer com rolagem para o conteúdo da tela)
+    <ScreenContainer scrollable={true}>
       {/* (Comentário Escondido: Título da tela) */}
       <Text style={styles.title}>Sobre o ComprasOnline</Text>
 
@@ -48,19 +50,13 @@ const InfoAppScreen = ({ navigation }) => {
         <Text style={styles.sectionContent}>{projectDescription}</Text>
       </View>
 
-    </ScrollView>
+    </ScreenContainer>
   );
 };
 
 // (Comentário Escondido: Estilos para os componentes da tela)
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  contentContainer: {
-    padding: 20,
-  },
+  // (Comentário Escondido: ScreenContainer já define o flex:1 e backgroundColor padrão)
   title: {
     fontSize: 24,
     fontWeight: 'bold',

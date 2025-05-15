@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "ComprasOnline",
+    "slug": "comprasonline",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#FFA500"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.manus.comprasonline"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFA500"
+      },
+      "package": "com.manus.comprasonline",
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
+    "newArchEnabled": true
+  }
+}
